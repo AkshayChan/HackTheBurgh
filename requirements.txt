@@ -2,4 +2,3 @@ numpy==1.15.1
 opencv_contrib_python==4.0.0.21
 Django==2.1.5
 scikit_image==0.14.0
-skimage==0.0
