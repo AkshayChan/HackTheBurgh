@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Discover - Draw Platformer</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/static/css/1-col-portfolio.css" rel="stylesheet">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        @media (min-width: 1000px) {
+            .upvote {
+                margin-top: 50px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Draw Platformer</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#">Upload Game</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Page Heading -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Maps
+                     <!-- <small>Most Recent</small> -->
+                </h1>
+            </div>
+        </div>
+        <!-- /.row -->
+        <div id="posts">
+            {% for map in recent_maps %}
+                <div class="post" id="{{map.id}}">
+                    <div class="row">
+                        <div class="col-md-1">
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div id="topic{{map.id}}" class="upvote upvote-programmers" style="">
+                                <a class="upvote upvote"></a>
+                                <span class="count">{{map.votes}}</span>
+                                <a class="downvote"></a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <a href="#">
+                                <img class="" src="{{ map.input_img.url }}" height="175" width="200" alt="">
+                            </a>
+                        </div>
+                        <div class="col-md-3 text-center" style="margin-top: 20px;">
+                            <h3>{{map.title}}</h3>
+                            {% if map.high_score == 9999 %}
+                                <h4>High Score: Unbeaten!</h4>
+                            {% else %}
+                                <h4>High Score: {{map.high_score}} set by {{map.high_score_name}}</h4>
+                            {% endif %}
+                            <a class="btn btn-primary" href="/play/{{map.title}}">Play Game<span class="glyphicon glyphicon-chevron-right"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <div id="pagination">
+            <a href="/discover/page/{{next_page}}" class="next">next</a>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.4/js.cookie.min.js"></script>
+
+
+    {% csrf_token %}
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/vendor/jquery-upvote/lib/jquery.upvote.js"></script>
+    <link rel="stylesheet" href="/static/vendor/jquery-upvote/lib/jquery.upvote.css">
+    <script type="text/javascript" src="/static/vendor/jquery-ias/jquery-ias.min.js"></script>
+
+    <script>
+        var callback = function(data) {
+                var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+                function csrfSafeMethod(method) {
+                    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                }
+
+                $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    }
+                });
+
+                $.post("/vote/", {
+                            id: data.id,
+                            up: data.upvoted,
+                            down: data.downvoted,
+                            prev: data.prev
+                },
+                function(response_data, status) {
+                });
+                console.log("data.upvoted" + data.upvoted);
+                console.log("data.downvoted" + data.downvoted);
+                if (data.upvoted) {
+                    console.log("upvoted path triggered");
+                    Cookies.set(data.id + "upvote", true, {path: '' });
+                    Cookies.set(data.id + "downvote", false, {path: '' });
+                }
+                else if (data.downvoted) {
+                    console.log("downvote path triggered");
+                    Cookies.set(data.id + "upvote", false, {path: '' });
+                    Cookies.set(data.id + "downvote", true, {path: '' });
+                }
+                else {
+                    console.log("this false gets triggered");
+                    Cookies.set(data.id + "upvote", false, {path: '' });
+                    Cookies.set(data.id + "downvote", false, {path: '' });
+                }
+        };
+
+        {% for map in recent_maps %}
+            upvoted = 0;
+            downvoted = 0;
+            if (Cookies.get('{{map.id}}upvote') == 'true') {
+                upvoted = 1;
+            }
+            else if (Cookies.get('{{map.id}}downvote') == 'true')
+            {
+                downvoted = 1;
+            }
+            $('#topic{{ map.id }}').upvote({id: {{map.id}}, upvoted: upvoted, downvoted: downvoted, callback: callback});
+        {% endfor %}
+
+    </script>
+
+    <script>
+        var ias = jQuery.ias({
+          container:  '#posts',
+          item:       '.post',
+          pagination: '#pagination',
+          next:       '.next'
+        });
+        ias.extension(new IASSpinnerExtension());
+        ias.on('rendered', function(items) {
+            var items = $(items);
+            for (i = 0; i < items.length; i++) {
+                var map_id = items[i].getAttribute("id");
+                upvoted = 0;
+                downvoted = 0;
+                if (Cookies.get(map_id + 'upvote') == 'true') {
+                    upvoted = 1;
+                }
+                else if (Cookies.get(map_id + 'downvote') == 'true')
+                {
+                    downvoted = 1;
+                }
+                $('#topic' + map_id).upvote({id: map_id, upvoted: upvoted, downvoted: downvoted, callback: callback});
+
+                }
+        })
+    </script>
+
+
+</body>
+
+</html>
